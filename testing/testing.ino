@@ -3,7 +3,7 @@ volatile byte detects;
 
 void magDetect() {
     detects++;
-    Serial.println('detected');
+    Serial.println("detected");
 }
 
 
@@ -15,6 +15,6 @@ void setup() {
 
 void loop() {
     delay(1000);
-    Serial.print('Detected :');
+    Serial.print("Detected :");
     Serial.println(detects);
 }
