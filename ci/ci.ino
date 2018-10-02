@@ -58,5 +58,5 @@ void loop()//Measure RPM
   {
     payload  = String(distance) + "," + String(cadence);
     Serial.println(payload); //Print cadence to serial
-  }  
+  }   
 }
