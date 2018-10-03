@@ -3,7 +3,6 @@ import serial
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
-import time
 
 def parse_data(data):
     ''' Parse data read from serial into seperate distance and cadence data.
@@ -12,31 +11,61 @@ def parse_data(data):
     data -- string containing distance and cadence data e.g 0.00,0
 
     Returns:
-    (distance, cadence) -- tuple with parsed distance and cadence data as float and int
+    (distance, cadence, elapsed_time) -- tuple with parsed distance, cadence and elapsed_time data as float, int and int
     '''
     data = data.decode("UTF-8").rstrip()
-    distance = float(data.split(",")[0])
-    cadence = int(data.split(",")[1])
-    return (distance, cadence)
+    if data == '':
+        distance = 0.0
+        cadence = 0
+        elapsed_time = 0
+    else:
+        distance = float(data.split(",")[0])
+        cadence = int(data.split(",")[1])
+        elapsed_time = int(data.split(",")[2])
+    return (distance, cadence, elapsed_time)
 
 def update_data(distance, cadence, elapsed_time, distance_data, cadence_data, time_data):
-    elapsed_time += 1
+    ''' Updates distance, cadence and time data that will be plotted with new parsed data and elapsed time
+
+    Keyword arguements:
+    distance -- float of parsed distance data in meters
+    cadence -- int of parsed cadence data
+    elapsed_time -- int of parsed elapsed time data
+    distance_data -- list containing existing distance data that will be appended to
+    cadence_data -- list containing existing cadence data that will be appended to
+    time_data -- list containing exisiting time data that will be appended to
+
+    Returns:
+    (distance_data, cadence_data, time_data) -- tuple of lists with new data appended
+    '''
     distance_data.append(distance)
     cadence_data.append(cadence)
     time_data.append(elapsed_time)
-    return(distance_data, cadence_data, time_data, elapsed_time)
+    return(distance_data, cadence_data, time_data)
 
 def update_graphs(distance_data, cadence_data, time_data):
+    ''' Updates graphs with new data
+    '''
     distance_graph.clear()
-    distance_graph.plot(time_data, distance_data)
     cadence_graph.clear()
+    distance_graph.plot(time_data, distance_data)
     cadence_graph.plot(time_data, cadence_data)
+
+def run(ser):
+    ''' Wrapper function called by matplotlib animation
+    '''
+    global distance_data, cadence_data, time_data
+    data = ser.readline()
+    parse_data = parse_data(data)
+    updated_data = update_data(parsed_data[0], parsed_data[1], parsed_data[2], distance_data, cadence_data, time_data)
+    update_graphs(updated_data[0], updated_data[1], updated_data[2])
+
 
 if __name__ == "__main__":
     # Create serial object
-    ser = serial.Serial('/dev/ttyUSB4', baudrate = 115200, timeout = 1)
+    ser = serial.Serial('/dev/ttyUSB0', baudrate = 115200, timeout = 1)
 
-    # Create arrays to hold data
+    # Create global arrays to hold data
     distance_data = []
     cadence_data = []
     time_data = []
@@ -45,18 +74,10 @@ if __name__ == "__main__":
     fig = plt.figure()
     distance_graph = fig.add_subplot(211)
     cadence_graph = fig.add_subplot(212)
+    # cadence_graph = fig.add_subplot()
 
-    elapsed_time = 0
+    ani = animation.FuncAnimation(fig, run, ser)
     plt.show()
-    
-    while 1:
-        data = ser.readline()
-        parsed_data = parse_data(data)
-        updated_data = update_data(parsed_data[0], parsed_data[1], elapsed_time, distance_data, cadence_data, time_data)
-        elapsed_time = updated_data[3]
-        print("fuck")
-        update_graphs(updated_data[0], updated_data[1], updated_data[2])
-
 
 # Sort out imports and create serial object
 # Read in the data and parse it appropriately i.e into distance and cadence
