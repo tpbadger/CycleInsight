@@ -31,13 +31,13 @@ void setup()
 
   passed_time = 0;
   crank_rot = 0;
-  cadence = 0; 
+  cadence = 0;
 
   elapsed_time = 0;
 
 }
 
-//MONITORING  
+//MONITORING
 void distance_detect() {
   wheel_rot ++; //update wheel_rot when called
 }
@@ -49,20 +49,14 @@ void cadence_detect() {
 //LOOP
 void loop()//Measure RPM
 {
-  delay(1000); //Update readings every second  
+  delay(1000); //Update readings every second
   elapsed_time ++;
-  distance = (wheel_rot * WHEEL_CIRC); //calculate distance 
-  if (crank_rot >= 5)
-  {
-    cadence = 30 * 1000 / (millis() - passed_time) * crank_rot;
-    passed_time = millis();
-    crank_rot = 0;
-    payload  = String(distance) + "," + String(cadence) + "," + String(elapsed_time);
-    Serial.println(payload); //Print cadence to serial
-  }
-  else
-  {
-    payload  = String(distance) + "," + String(cadence)+ "," + String(elapsed_time);
-    Serial.println(payload); //Print cadence to serial
-  }   
+  distance = (wheel_rot * WHEEL_CIRC); // calculate distance
+
+  cadence = 30 * 1000 / (millis() - passed_time) * crank_rot; // calculate cadence
+  passed_time = millis();
+  crank_rot = 0;
+
+  payload  = String(distance) + "," + String(cadence) + "," + String(elapsed_time); // send data over serial
+  Serial.println(payload); //Print cadence to serial
 }

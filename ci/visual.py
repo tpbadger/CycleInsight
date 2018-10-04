@@ -41,51 +41,69 @@ def update_data(distance, cadence, elapsed_time, distance_data, cadence_data, ti
     distance_data.append(distance)
     cadence_data.append(cadence)
     time_data.append(elapsed_time)
-    return(distance_data, cadence_data, time_data)
+    return (distance_data, cadence_data, time_data)
 
-def update_graphs(distance_data, cadence_data, time_data):
-    ''' Updates graphs with new data
-    '''
-    distance_graph.clear()
-    cadence_graph.clear()
-    distance_graph.plot(time_data, distance_data)
-    cadence_graph.plot(time_data, cadence_data)
+def update_graphs(i):
+    '''Update plotted graphs
 
-def run(ser):
-    ''' Wrapper function called by matplotlib animation
-    '''
-    global distance_data, cadence_data, time_data
+    Keyword arguements:
+    i -- mandatory arguement that is current frame in animation
+
+    Returns
+    (distance_plot, cadence_plot) -- tuple of plot objects
+    '''    
+    global ser, distance_data, cadence_data, time_data, intervals
     data = ser.readline()
-    parse_data = parse_data(data)
+    parsed_data = parse_data(data)
     updated_data = update_data(parsed_data[0], parsed_data[1], parsed_data[2], distance_data, cadence_data, time_data)
-    update_graphs(updated_data[0], updated_data[1], updated_data[2])
+
+    distance_plot.set_data(time_data, distance_data)
+    cadence_plot.set_data(time_data, cadence_data)
+
+    if time_data[-1] >= intervals[0]:
+        distance_plot.axes.set_xlim(time_data[-1], 2*intervals[0])
+        cadence_plot.axes.set_xlim(time_data[-1], 2*intervals[0])
+
+    if distance_data[-1] >= intervals[1]:
+        distance_plot.axes.set_ylim(distance_data[-1], 2*intervals[1])
+
+    if cadence_data[-1] >= intervals[2]:
+        cadence_plot.axes.set_ylim(cadence_data[-1], 2*intervals[2])
+    else:
+        cadence_plot.axes.set_ylim(0, intervals[2])
+
+    return (distance_plot, cadence_plot)
 
 
-if __name__ == "__main__":
-    # Create serial object
+if __name__ == '__main__':
+
     ser = serial.Serial('/dev/ttyUSB0', baudrate = 115200, timeout = 1)
-
-    # Create global arrays to hold data
     distance_data = []
     cadence_data = []
     time_data = []
 
-    # Create graphs
+    time_interval = 600
+    distance_interval = 1000
+    cadence_interval = 130
+
+    intervals = (time_interval, distance_interval, cadence_interval)
+
     fig = plt.figure()
-    distance_graph = fig.add_subplot(211)
-    cadence_graph = fig.add_subplot(212)
-    # cadence_graph = fig.add_subplot()
 
-    ani = animation.FuncAnimation(fig, run, ser)
+    distance_graph = fig.add_subplot(2,1,1)
+    distance_graph.set_xlabel('Elapsed time (s)')
+    distance_graph.set_ylabel('Distance (m)')
+    distance_graph.set_xlim(0,time_interval)
+    distance_graph.set_ylim(0, distance_interval)
+
+    cadence_graph = fig.add_subplot(2,1,2)
+    cadence_graph.set_xlabel('Elapsed time (s)')
+    cadence_graph.set_ylabel('Cadence')
+    cadence_graph.set_xlim(0,time_interval)
+    cadence_graph.set_ylim(0,cadence_interval)
+
+    distance_plot, = distance_graph.plot(time_data, distance_data)
+    cadence_plot, = cadence_graph.plot(time_data, cadence_data)
+
+    ani = animation.FuncAnimation(fig, update_graphs, blit = False, frames = 200, interval = 20, repeat = False)
     plt.show()
-
-# Sort out imports and create serial object
-# Read in the data and parse it appropriately i.e into distance and cadence
-# Create a data structure that the parsed data can be added to along with the elapsed time
-# Generate plots for the data
-# Write a function that can be called to update the graphs dynamically
-# Style the graphs appropriately
-# Export the data structures to an excel sheet with CI_data_{date}.xlsx as the file name
-
-# Set up a template excel sheet with space allocated for data
-# make a macro button that when you click generates tables for inserted data
