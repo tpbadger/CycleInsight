@@ -3,6 +3,7 @@ import serial
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+from test_excel import export_to_xl
 
 def parse_data(data):
     ''' Parse data read from serial into seperate distance and cadence data.
@@ -51,7 +52,7 @@ def update_graphs(i):
 
     Returns
     (distance_plot, cadence_plot) -- tuple of plot objects
-    '''    
+    '''
     global ser, distance_data, cadence_data, time_data, intervals
     data = ser.readline()
     parsed_data = parse_data(data)
@@ -73,7 +74,6 @@ def update_graphs(i):
         cadence_plot.axes.set_ylim(0, intervals[2])
 
     return (distance_plot, cadence_plot)
-
 
 if __name__ == '__main__':
 
@@ -107,3 +107,5 @@ if __name__ == '__main__':
 
     ani = animation.FuncAnimation(fig, update_graphs, blit = False, frames = 200, interval = 20, repeat = False)
     plt.show()
+    
+    export_to_xl(distance_data, cadence_data, time_data)
