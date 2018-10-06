@@ -1,6 +1,10 @@
-import serial.tools.list_ports
+import serial
+import time
+ser = serial.Serial('/dev/ttyUSB0', baudrate = 115200, timeout = 2)
+data = "go"
+data += "\r\n"
+time.sleep(2)
+ser.write(data.encode())
 
-ports = list(serial.tools.list_ports.comports())
-
-for port in range(0,len(ports)):
-    print(ports[port].device)
+while 1:
+    print(ser.readline())

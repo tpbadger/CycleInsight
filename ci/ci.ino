@@ -35,6 +35,9 @@ void setup()
 
   elapsed_time = 0;
 
+  while (!Serial.available()) {
+    //Do Absolutely Nothing until something is received over the serial port
+  }
 }
 
 //MONITORING

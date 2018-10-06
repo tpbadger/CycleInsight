@@ -1,9 +1,10 @@
 import sys
 import serial.tools.list_ports
+import time
 
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton, QLabel, QComboBox
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap
 
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -23,6 +24,7 @@ class App(QMainWindow):
         self.height = 720 # Height of GUI window
         self.initUI()
         self.setStyleSheet("background-color: white;")
+        self.text = ""
 
     def initUI(self):
         self.setWindowTitle(self.title) # Set title of the GUI
@@ -33,42 +35,67 @@ class App(QMainWindow):
 
         start_btn = QPushButton('Start', self)
         start_btn.setToolTip('Click to start session')
-        start_btn.move(975,310)
-        start_btn.resize(250,100)
-        start_btn.setStyleSheet("background-color: green");
+        start_btn.move(975,375)
+        start_btn.resize(250,75)
+        start_btn.setStyleSheet("background-color: green")
+        start_btn.clicked.connect(self.start_clicked)
 
         stop_btn = QPushButton('Stop', self)
         stop_btn.setToolTip('Click to stop session')
-        stop_btn.move(975, 430)
-        stop_btn.resize(250,100)
-        stop_btn.setStyleSheet("background-color: red");
+        stop_btn.move(975, 475)
+        stop_btn.resize(250,75)
+        stop_btn.setStyleSheet("background-color: red")
+        stop_btn.clicked.connect(self.stop_clicked)
 
 
         save_btn = QPushButton('Save', self)
         save_btn.setToolTip('Click to save session data')
-        save_btn.move(975, 550)
-        save_btn.resize(250,100)
-        save_btn.setStyleSheet("background-color: blue");
+        save_btn.move(975, 575)
+        save_btn.resize(250,75)
+        save_btn.setStyleSheet("background-color: blue")
+        save_btn.clicked.connect(self.save_clicked)
 
         self.port_lbl = QLabel("Select port:", self)
-        self.port_lbl.move(975, 200)
+        self.port_lbl.move(975, 270)
 
         port_dd = QComboBox(self)
-        port_dd.setToolTip('Select port that arduino is connected to. If nothing shows then restart CI after plugging in USB')
+        port_dd.setToolTip('Select port that arduio.resize(pixmap.width(), pixmap.height())no is connected to. If nothing shows then restart CI after plugging in USB')
         ports = self.get_ports()
+        port_dd.addItem("Select")
         for port in range(0,len(ports)):
             port_dd.addItem(ports[port].device)
-        port_dd.move(975, 250)
+        port_dd.activated[str].connect(self.on_selected)
+        port_dd.move(975, 300)
 
-        # TODO: add a cool logo for CI
-        self.ci_lbl = QLabel("CycleInsight", self)
-        self.ci_lbl.move(975, 150)
+        logo = QLabel(self)
+        pixmap = QPixmap('logo.png')
+        logo.setPixmap(pixmap)
+        logo.move(975, 80)
+        logo.resize(pixmap.width(), pixmap.height())
 
         self.show()
 
     def get_ports(self):
         ports = list(serial.tools.list_ports.comports())
         return ports
+
+    def on_selected(self, text):
+        self.text = text
+
+    def start_clicked(self):
+        global ser
+        ser = serial.Serial(self.text, baudrate = 115200, timeout = 1)
+        data = "go"
+        data += "\r\n"
+        time.sleep(2)
+        ser.write(data.encode())
+
+    def stop_clicked(self):
+        global ser
+        ser.close()
+
+    def save_clicked(self):
+        print("save")
 
 class PlotCanvas(FigureCanvas):
 
@@ -103,6 +130,8 @@ class PlotCanvas(FigureCanvas):
 
         distance_plot, = distance_graph.plot(time_data, distance_data)
         cadence_plot, = cadence_graph.plot(time_data, cadence_data)
+
+
 
 if __name__ == '__main__':
 
