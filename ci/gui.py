@@ -2,6 +2,7 @@ import sys
 import serial.tools.list_ports
 import time
 
+from utils import parse_data, update_data
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton, QLabel, QComboBox
 from PyQt5.QtGui import QIcon, QPixmap
@@ -31,6 +32,7 @@ class App(QMainWindow):
         self.setGeometry(self.left, self.top, self.width, self.height) # Size the GUI from specified parameters
 
         m = PlotCanvas(self, width = 10, height=7.2) # Plot the canvas where width = x represents x00 pixels e.g 8 = 800 pixels
+        # m.whatever is how to call stuff from canvas class in initUI
         m.move(0,0) # Move the canvas to the top corner of the GUI
 
         start_btn = QPushButton('Start', self)
@@ -89,10 +91,12 @@ class App(QMainWindow):
         data += "\r\n"
         time.sleep(2)
         ser.write(data.encode())
+        # TODO: m.update_graphs
 
     def stop_clicked(self):
         global ser
         ser.close()
+        # TODO: m.stop_updating graphs
 
     def save_clicked(self):
         print("save")
@@ -101,6 +105,7 @@ class PlotCanvas(FigureCanvas):
 
     def __init__(self, parent=None, width=10, height=7.2, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
+        self.test = "test"
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
@@ -130,7 +135,6 @@ class PlotCanvas(FigureCanvas):
 
         distance_plot, = distance_graph.plot(time_data, distance_data)
         cadence_plot, = cadence_graph.plot(time_data, cadence_data)
-
 
 
 if __name__ == '__main__':
