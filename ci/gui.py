@@ -1,6 +1,7 @@
 import sys
 import serial.tools.list_ports
 import time
+import datetime
 
 from utils import parse_data, update_data
 
@@ -13,7 +14,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-import random
+import xlsxwriter as xw
 
 class App(QMainWindow):
 
@@ -106,22 +107,25 @@ class App(QMainWindow):
         ser = serial.Serial(self.port, baudrate = 115200, timeout = 1)
         data = "go"
         data += "\r\n"
+        QMessageBox.about(self, "CI Info", "Session started")
         time.sleep(2)
         ser.write(data.encode())
         self.m.plot_data()
 
-    @staticmethod
-    def stop_clicked():
+    def stop_clicked(self):
         '''Close the serial port and reset the arduino
         '''
         global ser
+        self.m.stop_plot_data()
         ser.close()
-        # TODO: m.stop_updating graphs
+        QMessageBox.about(self, "CI Info", "Session stopped")
 
     def save_clicked(self):
         '''Save session data into Excel sheet
         '''
-        print("save")
+        self.m.export_to_xl()
+        QMessageBox.about(self, "CI Info", "Session saved")
+
 
 class PlotCanvas(FigureCanvas):
 
@@ -196,6 +200,9 @@ class PlotCanvas(FigureCanvas):
         self.ani = animation.FuncAnimation(fig, self.update_graphs, frames = 200, interval = 20, repeat = False)
         self.draw()
 
+    def stop_plot_data(self):
+        self.ani.event_source.stop()
+
     @staticmethod
     def parse_data(data):
         ''' Parse data read from serial into seperate distance and cadence data.
@@ -238,9 +245,52 @@ class PlotCanvas(FigureCanvas):
         time_data.append(elapsed_time)
         return (distance_data, cadence_data, time_data)
 
+    @staticmethod
+    def export_to_xl():
+        global distance_data, cadence_data, time_data
 
+        session_id = datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
 
+        workbook = xw.Workbook('./session data/CycleInsight ' + session_id + '.xlsx')
+        worksheet = workbook.add_worksheet()
+        worksheet.write('A1', 'Distance data')
+        worksheet.write('B1', 'Cadence data')
+        worksheet.write('C1', 'Time data')
 
+        data_length = len(time_data)
+
+        for data in range(1,data_length):
+            worksheet.write(data, 0, distance_data[data])
+            worksheet.write(data, 1, cadence_data[data])
+            worksheet.write(data, 2, time_data[data])
+
+        distance_chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight_with_markers'})
+        cadence_chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight_with_markers'})
+
+        distance_chart.add_series({
+        'name':       '=Sheet1!$A$1',
+        'categories': '=Sheet1!$C$2:$C$' + str(data_length),
+        'values':     '=Sheet1!$A$2:$A$' + str(data_length),
+        })
+
+        cadence_chart.add_series({
+        'name':       '=Sheet1!$B$1',
+        'categories': '=Sheet1!$C$2:$C$' + str(data_length),
+        'values':     '=Sheet1!$B$2:$B$' + str(data_length),
+        })
+
+        distance_chart.set_title({'name': 'Distance (m)'})
+        distance_chart.set_x_axis({'name': 'Time (s)'})
+        distance_chart.set_y_axis({'name': 'Distance (m)'})
+
+        cadence_chart.set_title({'name': 'Cadence (rpm)'})
+        cadence_chart.set_x_axis({'name': 'Time (s)'})
+        cadence_chart.set_y_axis({'name': 'Cadence (rpm)'})
+
+        worksheet.insert_chart('E1', distance_chart, {'x_offset': 25, 'y_offset': 10})
+        worksheet.insert_chart('E40', cadence_chart, {'x_offset': 25, 'y_offset': 10})
+
+        workbook.close()
 
 if __name__ == '__main__':
 
