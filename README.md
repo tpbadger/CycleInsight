@@ -12,6 +12,11 @@ Purpose of this project was to replace the hopeless cadence and distance sensor 
 
 ## Features
 Quick description of features + pictures
+
 ## How to install
+Requirements
+Step by step to start, stop, save
 
 ## Future development
+1. Bluetooth - No more USB cable
+2. Flask web server - Stream data to web server so session information can be viewed on mobile devices
