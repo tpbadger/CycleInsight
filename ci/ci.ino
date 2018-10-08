@@ -1,9 +1,15 @@
+#include <Event.h>
+#include <Timer.h>
+
 //GLOBALS
 # define WHEEL_DIAMETER 0.68 //Set wheel diameter
 # define WHEEL_CIRC WHEEL_DIAMETER*PI //Calc and set wheel circumference
 
 
 //VARIABLES
+
+Timer t;
+
 // For utility
 unsigned int elapsed_time;
 
@@ -34,6 +40,7 @@ void setup()
   cadence = 0;
 
   elapsed_time = 0;
+  t.every(1000,sendPayload,0);
 
   while (!Serial.available()) {
     //Do Absolutely Nothing until something is received over the serial port
@@ -52,14 +59,20 @@ void cadence_detect() {
 //LOOP
 void loop()//Measure RPM
 {
-  delay(1000); //Update readings every second
-  elapsed_time ++;
+  t.update();
   distance = (wheel_rot * WHEEL_CIRC); // calculate distance
+  if (crank_rot >= 5)
+  {
+    cadence = 30 * 1000 / (millis() - passed_time) * crank_rot; // calculate cadence
+    passed_time = millis();
+    crank_rot = 0;
+  }
+}
 
-  cadence = 30 * 1000 / (millis() - passed_time) * crank_rot; // calculate cadence
-  passed_time = millis();
-  crank_rot = 0;
 
+void sendPayload(void*)
+{
+  elapsed_time ++;
   payload  = String(distance) + "," + String(cadence) + "," + String(elapsed_time); // send data over serial
   Serial.println(payload); //Print cadence to serial
 }

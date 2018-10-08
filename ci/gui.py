@@ -3,8 +3,6 @@ import serial.tools.list_ports
 import time
 import datetime
 
-from utils import parse_data, update_data
-
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton, QLabel, QComboBox
 from PyQt5.QtGui import QIcon, QPixmap
 
@@ -121,7 +119,7 @@ class App(QMainWindow):
         QMessageBox.about(self, "CI Info", "Session stopped")
 
     def save_clicked(self):
-        '''Save session data into Excel sheet
+        '''Save session data into Excel sheetINSERT IMAGE OF LABELLED GUI
         '''
         self.m.export_to_xl()
         QMessageBox.about(self, "CI Info", "Session saved")
@@ -175,11 +173,8 @@ class PlotCanvas(FigureCanvas):
         '''
         global ser, distance_data, cadence_data, time_data, intervals, distance_plot, cadence_plot
         data = ser.readline()
-        parsed_data = parse_data(data)
-        updated_data = update_data(parsed_data[0], parsed_data[1], parsed_data[2], distance_data, cadence_data, time_data)
-
-        distance_plot.set_data(time_data, distance_data)
-        cadence_plot.set_data(time_data, cadence_data)
+        parsed_data = self.parse_data(data)
+        updated_data = self.update_data(parsed_data[0], parsed_data[1], parsed_data[2], distance_data, cadence_data, time_data)
 
         if time_data[-1] >= intervals[0]:
             distance_plot.axes.set_xlim(time_data[-1], 2*intervals[0])
@@ -193,11 +188,14 @@ class PlotCanvas(FigureCanvas):
         else:
             cadence_plot.axes.set_ylim(0, intervals[2])
 
+        distance_plot.set_data(time_data, distance_data)
+        cadence_plot.set_data(time_data, cadence_data)
+
         return (distance_plot, cadence_plot)
 
     def plot_data(self):
         global fig
-        self.ani = animation.FuncAnimation(fig, self.update_graphs, frames = 200, interval = 20, repeat = False)
+        self.ani = animation.FuncAnimation(fig, self.update_graphs, interval = 20, repeat = False)
         self.draw()
 
     def stop_plot_data(self):
@@ -288,7 +286,7 @@ class PlotCanvas(FigureCanvas):
         cadence_chart.set_y_axis({'name': 'Cadence (rpm)'})
 
         worksheet.insert_chart('E1', distance_chart, {'x_offset': 25, 'y_offset': 10})
-        worksheet.insert_chart('E40', cadence_chart, {'x_offset': 25, 'y_offset': 10})
+        worksheet.insert_chart('E18', cadence_chart, {'x_offset': 25, 'y_offset': 10})
 
         workbook.close()
 
