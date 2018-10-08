@@ -182,11 +182,10 @@ class PlotCanvas(FigureCanvas):
 
         if distance_data[-1] >= intervals[1]:
             distance_plot.axes.set_ylim(distance_data[-1], 2*intervals[1])
+            intervals[1]=2*intervals[1]
 
         if cadence_data[-1] >= intervals[2]:
-            cadence_plot.axes.set_ylim(cadence_data[-1], 2*intervals[2])
-        else:
-            cadence_plot.axes.set_ylim(0, intervals[2])
+            cadence_plot.axes.set_ylim(0, cadence_data[-1])
 
         distance_plot.set_data(time_data, distance_data)
         cadence_plot.set_data(time_data, cadence_data)
