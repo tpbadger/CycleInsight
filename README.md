@@ -34,11 +34,11 @@ INSERT IMAGE OF ABOVE
 6. Stick one magnet onto a spoke of your rear wheel
 7. Arrange your hall effect sensors on your 3D printed bracket so the crank and rear wheel magnets will pass in front of them when you are pedalling. An example is shown below:
 
-![Crank magnet](Crank_Magnet.jpg)
+![Crank magnet](./Images/Crank_Magnet.jpg)
 
-![Wheel magnet](Wheel_Magnet.jpg)
+![Wheel magnet](./Images/Wheel_Magnet.jpg)
 
-![Chainstay braacket with janky arduino fixing!](Chainstay_Bracket.jpg)
+![Chainstay braacket with janky arduino fixing!](./Images/Chainstay_Bracket.jpg)
 
 ## How to use cycle insight
 To get started with a session plug in the Arduino USB cable into a free port on your computer (yet to test with USB hubs so for now make sure its native to your device). Then do the following:
@@ -48,7 +48,7 @@ To get started with a session plug in the Arduino USB cable into a free port on 
 4. When you want to stop the session click stop
 5. If you want to save your session data then click save. The data will be saved into an Excel workbook under the session data folder in 'cycleInsight/ci/session data'
 
-![Labelled Gui](Gui_overview.png)
+![Labelled Gui](./Images/Gui_overview.png)
 
 ## Future development
 * Bluetooth - No more USB cable
