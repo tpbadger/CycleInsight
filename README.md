@@ -15,8 +15,6 @@ Purpose of this project was to replace the hopeless cadence and distance sensor 
 * Animated session data - Users distance and candence is plotted on dynamic graphs within the GUI window
 * Export session data to Excel workbook - Users session data can be exported to an Excel workbook within the 'session data' folder. Graphs of distance and cadence are automatically plotted within the workbook
 
-INSERT IMAGE OF ABOVE
-
 ## How to install
 1. Make sure you have python 3.7.0 installed
 2. Clone the Repo
